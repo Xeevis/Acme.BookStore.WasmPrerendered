@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Blazorise.Bootstrap5;
+using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
@@ -20,6 +22,7 @@ using Volo.Abp.Account.Web;
 using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
+using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
@@ -40,7 +43,8 @@ namespace Acme.BookStore.WasmPrerendered;
     typeof(AbpAspNetCoreMvcUiBasicThemeModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpAspNetCoreSerilogModule),
-    typeof(AbpSwashbuckleModule)
+    typeof(AbpSwashbuckleModule),
+    typeof(Volo.Abp.AspNetCore.Components.Web.Theming.AbpAspNetCoreComponentsWebThemingModule)
 )]
 public class WasmPrerenderedHttpApiHostModule : AbpModule
 {
@@ -70,6 +74,12 @@ public class WasmPrerenderedHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+
+        context.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider, Microsoft.AspNetCore.Components.Server.ServerAuthenticationStateProvider>();
+        Configure<Volo.Abp.AspNetCore.Components.Web.Theming.Routing.AbpRouterOptions>(options => options.AppAssembly = typeof(Blazor.WasmPrerenderedBlazorModule).Assembly);
+        context.Services
+            .AddBootstrap5Providers()
+            .AddFontAwesomeIcons();
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -218,6 +228,7 @@ public class WasmPrerenderedHttpApiHostModule : AbpModule
         }
 
         app.UseCorrelationId();
+        app.UseBlazorFrameworkFiles();
         app.UseStaticFiles();
         app.UseRouting();
         app.UseCors();
@@ -245,5 +256,6 @@ public class WasmPrerenderedHttpApiHostModule : AbpModule
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();
+        ((WebApplication)app).MapFallbackToPage("/_Host");
     }
 }

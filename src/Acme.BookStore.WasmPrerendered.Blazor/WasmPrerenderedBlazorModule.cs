@@ -84,7 +84,6 @@ public class WasmPrerenderedBlazorModule : AbpModule
 
     private static void ConfigureUI(WebAssemblyHostBuilder builder)
     {
-        builder.RootComponents.Add<App>("#ApplicationContainer");
 
     }
 
