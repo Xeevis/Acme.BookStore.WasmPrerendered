@@ -1,4 +1,4 @@
-# Prerendering your Blazor Wasm application with ABP
+# Prerendering your Blazor Wasm application with ABP 6.x
 
 ## Introduction
 
